@@ -2,7 +2,6 @@ package user
 
 import (
 	"bytes"
-	"fmt"
 	"testing"
 
 	"github.com/matryer/is"
@@ -85,10 +84,9 @@ func TestNewConfig(t *testing.T) {
 		},
 	}
 
-	for i, tc := range tests {
+	for _, tc := range tests {
 		tc := tc
-		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-			t.Log(tc.description)
+		t.Run(tc.description, func(t *testing.T) {
 			is := is.New(t)
 			got, err := NewConfig(tc.argFwID, tc.argIPs...)
 			if !tc.hasError {
@@ -165,10 +163,9 @@ func TestConfig_HasIP(t *testing.T) {
 		},
 	}
 
-	for i, tc := range tests {
+	for _, tc := range tests {
 		tc := tc
-		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-			t.Log(tc.description)
+		t.Run(tc.description, func(t *testing.T) {
 			is := is.New(t)
 			_, got := tc.cfg.HasIP(tc.ip)
 			is.Equal(got, tc.expect)
@@ -223,10 +220,9 @@ func TestConfig_Add(t *testing.T) {
 		},
 	}
 
-	for i, tc := range tests {
+	for _, tc := range tests {
 		tc := tc
-		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-			t.Log(tc.description)
+		t.Run(tc.description, func(t *testing.T) {
 			is := is.New(t)
 			tc.cfg.Add(tc.ip)
 			is.Equal(tc.cfg, tc.expect)
@@ -304,10 +300,9 @@ func TestConfig_Remove(t *testing.T) {
 		},
 	}
 
-	for i, tc := range tests {
+	for _, tc := range tests {
 		tc := tc
-		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-			t.Log(tc.description)
+		t.Run(tc.description, func(t *testing.T) {
 			is := is.New(t)
 			tc.cfg.Remove(tc.ip)
 			is.Equal(tc.cfg, tc.expect)
