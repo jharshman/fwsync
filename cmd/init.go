@@ -15,6 +15,9 @@ const (
 )
 
 func Initialize() *cobra.Command {
+
+	var local *user.Config
+
 	return &cobra.Command{
 		Use:   "init",
 		Short: "Initialize fwsync configuration.",
@@ -43,6 +46,7 @@ func Initialize() *cobra.Command {
 			if err != nil {
 				return err
 			}
+			local = cfg
 
 			// write file
 			home, _ := os.UserHomeDir()
@@ -52,6 +56,9 @@ func Initialize() *cobra.Command {
 			}
 			defer f.Close()
 			return cfg.Write(f)
+		},
+		PostRunE: func(cmd *cobra.Command, args []string) error {
+			return synchronize(local)
 		},
 	}
 }

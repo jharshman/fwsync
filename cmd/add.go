@@ -4,11 +4,17 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/jharshman/fwsync/internal/auth"
 	"github.com/jharshman/fwsync/internal/user"
 	"github.com/spf13/cobra"
+	"google.golang.org/api/compute/v1"
 )
 
 func Add() *cobra.Command {
+
+	// Local variable shared between the closures.
+	var local *user.Config
+
 	return &cobra.Command{
 		Use:   "add",
 		Short: "Allow a new IP on the firewall.",
@@ -35,6 +41,7 @@ func Add() *cobra.Command {
 			// Remove oldest in list.
 			// Add appends at end so oldest will be front of list.
 			cfg.Add(currentIP)
+			local = cfg
 
 			// truncate file for writing
 			// cannot use Create or os.O_TRUNC
@@ -44,5 +51,24 @@ func Add() *cobra.Command {
 
 			return cfg.Write(f)
 		},
+		PostRunE: func(cmd *cobra.Command, args []string) error {
+			return synchronize(local)
+		},
 	}
+}
+
+func synchronize(cfg *user.Config) error {
+	// CIDR notation required by GoogleAPIs.
+	for idx, _ := range cfg.SourceIPs {
+		cfg.SourceIPs[idx] = cfg.SourceIPs[idx] + "/32"
+	}
+
+	fw := &compute.Firewall{
+		SourceRanges: cfg.SourceIPs,
+	}
+	_, err := auth.GoogleCloudAuthorizedClient.Firewalls.Patch(project, cfg.Name, fw).Do()
+	if err != nil {
+		return err
+	}
+	return nil
 }

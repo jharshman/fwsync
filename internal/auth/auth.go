@@ -3,11 +3,12 @@ package auth
 import (
 	"context"
 	"errors"
+	"os"
+	"sync"
+
 	"github.com/spf13/cobra"
 	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/option"
-	"os"
-	"sync"
 )
 
 var (

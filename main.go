@@ -26,9 +26,6 @@ connecting from and keeps your development VM firewall rule up to date with that
 	rootCmd.AddCommand(cmd.Initialize())
 	rootCmd.AddCommand(cmd.List())
 	rootCmd.AddCommand(cmd.Add())
-	//rootCmd.AddCommand(cmd.Remove())
-	//rootCmd.AddCommand(cmd.Reset())
-	//rootCmd.AddCommand(cmd.Sync())
 
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
