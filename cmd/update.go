@@ -22,8 +22,7 @@ func Update() *cobra.Command {
 		Short: "Allow a new IP on the firewall.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// get local configuration
-			home, _ := os.UserHomeDir()
-			f, err := os.OpenFile(fmt.Sprintf("%s/%s", home, transactionFile), os.O_RDWR, 0666)
+			f, err := os.OpenFile(cfgFilePath, os.O_RDWR, 0666)
 			if err != nil {
 				return err
 			}
@@ -60,14 +59,14 @@ func Update() *cobra.Command {
 	}
 }
 
+// Sync initiates a manual synchronization of the local configuration stored in ~/.bitly_firewall to the desired GCP Firewall.
 func Sync() *cobra.Command {
 	return &cobra.Command{
 		Use:   "sync",
 		Short: "Synchronize local config with firewall",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// get local configuration
-			home, _ := os.UserHomeDir()
-			f, err := os.OpenFile(fmt.Sprintf("%s/%s", home, transactionFile), os.O_RDWR, 0666)
+			f, err := os.OpenFile(cfgFilePath, os.O_RDWR, 0666)
 			if err != nil {
 				return err
 			}

@@ -15,15 +15,16 @@ const (
 	project         = "bitly-devvm"
 )
 
+var (
+	home, _     = os.UserHomeDir()
+	cfgFilePath = fmt.Sprintf("%s/%s", home, transactionFile)
+)
+
 // Initialize performs the first sync of the firewall rule. It will prompt the user to select
 // the firewall rule with his or her name and then will update that firewall rule with their current
 // public IP. Any existing source IPs on the firewall rule will be overwritten.
 func Initialize() *cobra.Command {
-
 	var local *user.Config
-	home, _ := os.UserHomeDir()
-	cfgFilePath := fmt.Sprintf("%s/%s", home, transactionFile)
-
 	return &cobra.Command{
 		Use:   "init",
 		Short: "Initialize fwsync configuration.",
