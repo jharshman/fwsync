@@ -1,6 +1,6 @@
 # fwsync
 
-![CI](https://github.com/jharshman/fwsync/actions/workflows/ci.yaml/badge.svg?branch=master)
+[![CI](https://github.com/jharshman/fwsync/actions/workflows/ci.yaml/badge.svg)](https://github.com/jharshman/fwsync/actions/workflows/ci.yaml)
 
 Provides CLI interface to update your personal Firewall Rules
 associated with your Cloud Development VM.
