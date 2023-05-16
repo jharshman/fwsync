@@ -10,7 +10,9 @@ import (
 	"google.golang.org/api/compute/v1"
 )
 
-func Add() *cobra.Command {
+// Update will intelligently update the firewall rule if the user's public IP has changed and doesn't exist in the
+// current rule. If the IP is to be added and the number of IPs in the rule exceeds 5, the oldest IP is dropped from the list.
+func Update() *cobra.Command {
 
 	// Local variable shared between the closures.
 	var local *user.Config
@@ -39,7 +41,7 @@ func Add() *cobra.Command {
 			}
 
 			// Remove oldest in list.
-			// Add appends at end so oldest will be front of list.
+			// Update appends at end so oldest will be front of list.
 			cfg.Add(currentIP)
 			local = cfg
 
@@ -52,11 +54,36 @@ func Add() *cobra.Command {
 			return cfg.Write(f)
 		},
 		PostRunE: func(cmd *cobra.Command, args []string) error {
+			fmt.Println("syncing firewall rule")
 			return synchronize(local)
 		},
 	}
 }
 
+func Sync() *cobra.Command {
+	return &cobra.Command{
+		Use:   "sync",
+		Short: "Synchronize local config with firewall",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			// get local configuration
+			home, _ := os.UserHomeDir()
+			f, err := os.OpenFile(fmt.Sprintf("%s/%s", home, transactionFile), os.O_RDWR, 0666)
+			if err != nil {
+				return err
+			}
+			defer f.Close()
+
+			cfg, err := user.NewFromFile(f)
+			if err != nil {
+				return err
+			}
+
+			return synchronize(cfg)
+		},
+	}
+}
+
+// synchronize will use the local configuration update the desired firewall rule.
 func synchronize(cfg *user.Config) error {
 	// CIDR notation required by GoogleAPIs.
 	for idx, _ := range cfg.SourceIPs {

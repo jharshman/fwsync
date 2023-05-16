@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
 
 	"github.com/jharshman/fwsync/cmd"
@@ -24,10 +25,13 @@ connecting from and keeps your development VM firewall rule up to date with that
 	}
 
 	rootCmd.AddCommand(cmd.Initialize())
+	rootCmd.AddCommand(cmd.Update())
 	rootCmd.AddCommand(cmd.List())
-	rootCmd.AddCommand(cmd.Add())
+	rootCmd.AddCommand(cmd.Sync())
 
 	if err := rootCmd.Execute(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+	fmt.Println("Operation complete, no errors.")
 }

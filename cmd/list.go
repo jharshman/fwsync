@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/jharshman/fwsync/internal/auth"
 	"github.com/jharshman/fwsync/internal/user"
@@ -37,9 +38,17 @@ func List() *cobra.Command {
 			remoteIPs := fw.SourceRanges
 
 			// pretty print
-			fmt.Printf("fwsync configurations\n----------------------\nlocal: (%s)\n%s\n", f.Name(), localIPs)
-			fmt.Printf("\nremote: (%s)\n%s", cfg.Name, remoteIPs)
+			fmt.Printf("fwsync configurations\n----------------------\nlocal: (%s)\n%s", f.Name(), prettyPrint(localIPs))
+			fmt.Printf("\nremote: (%s)\n%s", cfg.Name, prettyPrint(remoteIPs))
 			return nil
 		},
 	}
+}
+
+func prettyPrint(in []string) string {
+	builder := strings.Builder{}
+	for _, v := range in {
+		builder.WriteString(v + "\n")
+	}
+	return builder.String()
 }
