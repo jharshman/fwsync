@@ -1,0 +1,9 @@
+linters:
+  disable-all: true
+  enable:
+    - gosimple
+    - govet
+    - ineffassign
+    - unused
+    - goimports
+

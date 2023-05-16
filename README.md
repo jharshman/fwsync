@@ -8,6 +8,10 @@ associated with your Cloud Development VM.
 ## Installation
 
 TODO how to install
+Install by running the following in your terminal:
+```bash
+$ curl https://github.com/jharshman/fwsync/... | sh
+```
 
 ## Usage
 
