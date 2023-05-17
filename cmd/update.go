@@ -18,7 +18,7 @@ func Update() *cobra.Command {
 	var local *user.Config
 
 	return &cobra.Command{
-		Use:   "add",
+		Use:   "update",
 		Short: "Allow a new IP on the firewall.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// get local configuration
