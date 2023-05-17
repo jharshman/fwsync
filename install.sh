@@ -13,7 +13,7 @@ tar -C $HOME/.local/bin/ --exclude README.md -zxvf fwsync_${OS}_${ARCH}.tar.gz
 chmod +x $HOME/.local/bin/fwsync
 
 # update PATH if required.
-if grep -q '# ADDED BY FWSYNC'; then
+if ! grep -q '# ADDED BY FWSYNC' $HOME/.zshrc; then
   echo "export PATH=\$HOME/.local/bin:\$PATH # ADDED BY FWSYNC" >> $HOME/.zshrc
 fi
 
