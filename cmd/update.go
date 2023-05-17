@@ -85,7 +85,7 @@ func Sync() *cobra.Command {
 // synchronize will use the local configuration update the desired firewall rule.
 func synchronize(cfg *user.Config) error {
 	// CIDR notation required by GoogleAPIs.
-	for idx, _ := range cfg.SourceIPs {
+	for idx := range cfg.SourceIPs {
 		cfg.SourceIPs[idx] = cfg.SourceIPs[idx] + "/32"
 	}
 
