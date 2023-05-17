@@ -7,10 +7,9 @@ associated with your Cloud Development VM.
 
 ## Installation
 
-TODO how to install
 Install by running the following in your terminal:
 ```bash
-$ curl https://github.com/jharshman/fwsync/... | sh
+$ curl https://raw.githubusercontent.com/jharshman/fwsync/master/install.sh | sh
 ```
 
 ## Usage
