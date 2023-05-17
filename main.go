@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
 
@@ -9,10 +8,6 @@ import (
 	"github.com/jharshman/fwsync/internal/auth"
 	"github.com/spf13/cobra"
 )
-
-func init() {
-	flag.Parse()
-}
 
 func main() {
 

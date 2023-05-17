@@ -1,4 +1,5 @@
 #!/bin/sh
+# Installs FWSYNC release.
 
 VERSION="v0.0.1-1"
 OS=$(uname -s | tr -d '\n')
@@ -8,17 +9,19 @@ RELEASE=https://github.com/jharshman/fwsync/releases/download/${VERSION}/fwsync_
 # install
 mkdir -p $HOME/.local/bin
 wget $RELEASE
-tar -zxvf -C $HOME/.local/bin/ fwsync_${OS}_${ARCH}
+tar -C $HOME/.local/bin/ --exclude README.md -zxvf fwsync_${OS}_${ARCH}.tar.gz
 chmod +x $HOME/.local/bin/fwsync
 
-# update PATH
-echo "export PATH=$HOME/.local/bin:$PATH" >> $HOME/.bashrc
+# update PATH if required.
+if grep -q '# ADDED BY FWSYNC'; then
+  echo "export PATH=\$HOME/.local/bin:\$PATH # ADDED BY FWSYNC" >> $HOME/.zshrc
+fi
 
 cat <<EOM
 /////////////
 // FWSYNC has been installed at $HOME/.local/bin/fwsync
 //
-// Your PATH has been updated in .bashrc.
+// Your PATH has been updated in .zshrc.
 // Restart your Terminal for the changes to take effect.
 ///////////////////////////////////////////////////////////
 EOM
