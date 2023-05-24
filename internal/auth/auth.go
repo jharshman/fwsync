@@ -2,13 +2,10 @@ package auth
 
 import (
 	"context"
-	"errors"
-	"os"
 	"sync"
 
 	"github.com/spf13/cobra"
 	"google.golang.org/api/compute/v1"
-	"google.golang.org/api/option"
 )
 
 var (
@@ -16,20 +13,19 @@ var (
 	once                        sync.Once
 )
 
+// Auth returns the authentication function.
 func Auth() func(cmd *cobra.Command, args []string) error {
 	return func(cmd *cobra.Command, args []string) error {
-		serviceAccountJSONPath := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
-		if serviceAccountJSONPath == "" {
-			return errors.New("missing environment variable GOOGLE_APPLICATION_CREDENTIALS")
-		}
-		return auth(serviceAccountJSONPath)
+		return auth()
 	}
 }
 
-func auth(svcAcctFile string) (authErr error) {
+// auth will authenticate to the Google APIs using default methods.
+// https://cloud.google.com/docs/authentication/application-default-credentials#personal
+func auth() (authErr error) {
 	once.Do(func() {
 		var cc *compute.Service
-		cc, authErr = compute.NewService(context.Background(), option.WithCredentialsFile(svcAcctFile))
+		cc, authErr = compute.NewService(context.Background())
 		GoogleCloudAuthorizedClient = cc
 	})
 	return
