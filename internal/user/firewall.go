@@ -82,7 +82,7 @@ func (c *Config) Remove(ip string) {
 func PublicIP() (string, error) {
 	// use https://icanhazip.com/
 	// reliable and owned and operated by cloudflare.
-	res, err := http.Get("https://icanhazip.com")
+	res, err := http.Get("https://ipv4.icanhazip.com")
 	if err != nil {
 		return "", err
 	}
