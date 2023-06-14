@@ -1,7 +1,7 @@
 #!/bin/sh
 # Installs FWSYNC release.
 
-VERSION="v0.0.1-3"
+VERSION="v0.0.1-4"
 OS=$(uname -s | tr -d '\n')
 ARCH=$(uname -m | tr -d '\n')
 RELEASE=https://github.com/jharshman/fwsync/releases/download/${VERSION}/fwsync_${OS}_${ARCH}.tar.gz
