@@ -16,13 +16,11 @@ $ curl https://raw.githubusercontent.com/jharshman/fwsync/master/install.sh | sh
 ## Usage
 
 ### Authentication
-Communication to the GoogleAPIs requires either setting the environment variable `GOOGLE_APPLICATION_CREDENTIALS` or
-alternatively running `gcloud auth application-default login`. If using the `GOOGLE_APPLICATION_CREDENTIALS` environment
-variable, it must point to the full path to your downloaded service account json.
+The reccomended method of authentication is to run the following command:
 
-For example:
-
-`$ export GOOGLE_APPLICATION_CREDENTIALS=/Users/bob/bobserviceaccount.json`
+```bash
+$ gcloud auth application-default login
+```
 
 ### Init
 After installing, you can invoke the CLI by typing `fwsync` in your terminal.

@@ -49,7 +49,7 @@ func Initialize() *cobra.Command {
 
 				_, ok := ask(fmt.Sprintf("You've selected %s, is that correct? [Y/n]: ", firewalls.Items[i].Name), true, func(val string) bool {
 					switch val {
-					case "Y", "y", "yes":
+					case "Y", "y", "yes", "":
 					case "N", "n", "no":
 						return false
 					default:
@@ -92,7 +92,7 @@ func Initialize() *cobra.Command {
 			// prompt to nuke existing configuration file.
 			ask("Existing configuration file detected. Continue anyway? [Y/n]: ", false, func(val string) bool {
 				switch val {
-				case "Y", "y", "yes":
+				case "Y", "y", "yes", "":
 				case "N", "n", "no":
 					os.Exit(0)
 				default:
