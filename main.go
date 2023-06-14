@@ -3,11 +3,15 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
+	ghapi "github.com/cli/go-gh/v2/pkg/api"
 	"github.com/jharshman/fwsync/cmd"
 	"github.com/jharshman/fwsync/internal/auth"
 	"github.com/spf13/cobra"
 )
+
+var version string
 
 func main() {
 
@@ -29,4 +33,19 @@ connecting from and keeps your development VM firewall rule up to date with that
 		os.Exit(1)
 	}
 	fmt.Println("Operation complete, no errors.")
+
+	notifyIfUpdateAvailable()
+}
+
+func notifyIfUpdateAvailable() {
+	cli, _ := ghapi.DefaultRESTClient()
+	latestTag := struct {
+		Tag string `json:"tag_name"`
+	}{}
+	cli.Get("repos/jharshman/fwsync/releases/latest", &latestTag)
+	tag := strings.TrimPrefix(latestTag.Tag, "v")
+	if tag != version {
+		fmt.Printf("\n\033[0;32mA new version (%q) is available for fwsync.\033[0m\n", latestTag.Tag)
+		fmt.Printf("\033[0;32mTo update run:\ncurl https://raw.githubusercontent.com/jharshman/fwsync/master/install.sh | sh\033[0m\n")
+	}
 }
