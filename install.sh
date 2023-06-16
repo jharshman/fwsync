@@ -6,6 +6,9 @@ OS=$(uname -s | tr -d '\n')
 ARCH=$(uname -m | tr -d '\n')
 RELEASE=https://github.com/jharshman/fwsync/releases/download/${VERSION}/fwsync_${OS}_${ARCH}.tar.gz
 
+# delete any existing archives otherwise noop
+rm -f fwsync_${OS}_${ARCH}.tar.gz* || :
+
 which wget > /dev/null 2>&1
 if [[ $? != 0 ]]; then
   echo "FATAL missing wget"
@@ -36,3 +39,5 @@ cat <<EOM
 * Restart your Terminal for the changes to take effect.
 ********************************************************
 EOM
+
+rm -f fwsync_${OS}_${ARCH}.tar.gz
