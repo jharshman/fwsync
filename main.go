@@ -23,10 +23,19 @@ connecting from and keeps your development VM firewall rule up to date with that
 		PersistentPreRunE: auth.Auth(),
 	}
 
+	versionCmd := &cobra.Command{
+		Use:   "version",
+		Short: "Display version information",
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println(version)
+		},
+	}
+
 	rootCmd.AddCommand(cmd.Initialize())
 	rootCmd.AddCommand(cmd.Update())
 	rootCmd.AddCommand(cmd.List())
 	rootCmd.AddCommand(cmd.Sync())
+	rootCmd.AddCommand(versionCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
