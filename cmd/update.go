@@ -16,6 +16,7 @@ func Update() *cobra.Command {
 
 	// Local variable shared between the closures.
 	var local *user.Config
+	var skipSync bool
 
 	return &cobra.Command{
 		Use:   "update",
@@ -36,6 +37,7 @@ func Update() *cobra.Command {
 			currentIP, _ := user.PublicIP()
 			_, ipExists := cfg.HasIP(currentIP)
 			if ipExists {
+				skipSync = true
 				return nil
 			}
 
@@ -53,6 +55,10 @@ func Update() *cobra.Command {
 			return cfg.Write(f)
 		},
 		PostRunE: func(cmd *cobra.Command, args []string) error {
+			if skipSync {
+				fmt.Println("IPs are up-to-date, skipping sync.")
+				return nil
+			}
 			fmt.Println("syncing firewall rule")
 			return synchronize(local)
 		},

@@ -34,18 +34,28 @@ connecting from and keeps your development VM firewall rule up to date with that
 	}
 	fmt.Println("Operation complete, no errors.")
 
-	notifyIfUpdateAvailable()
+	err := notifyIfUpdateAvailable()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	}
 }
 
-func notifyIfUpdateAvailable() {
-	cli, _ := ghapi.DefaultRESTClient()
+func notifyIfUpdateAvailable() error {
+	cli, err := ghapi.DefaultRESTClient()
+	if err != nil {
+		return err
+	}
 	latestTag := struct {
 		Tag string `json:"tag_name"`
 	}{}
-	cli.Get("repos/jharshman/fwsync/releases/latest", &latestTag)
+	err = cli.Get("repos/jharshman/fwsync/releases/latest", &latestTag)
+	if err != nil {
+		return err
+	}
 	tag := strings.TrimPrefix(latestTag.Tag, "v")
 	if tag != version {
 		fmt.Printf("\n\033[0;32mA new version (%q) is available for fwsync.\033[0m\n", latestTag.Tag)
 		fmt.Printf("\033[0;32mTo update run:\ncurl https://raw.githubusercontent.com/jharshman/fwsync/master/install.sh | sh\033[0m\n")
 	}
+	return nil
 }
