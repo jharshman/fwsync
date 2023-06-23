@@ -1,11 +1,12 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
 
-	ghapi "github.com/cli/go-gh/v2/pkg/api"
+	"github.com/google/go-github/v53/github"
 	"github.com/jharshman/fwsync/cmd"
 	"github.com/jharshman/fwsync/internal/auth"
 	"github.com/spf13/cobra"
@@ -45,25 +46,19 @@ connecting from and keeps your development VM firewall rule up to date with that
 
 	err := notifyIfUpdateAvailable()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintf(os.Stderr, "Error checking for updates to fwsync: %q", err)
 	}
 }
 
 func notifyIfUpdateAvailable() error {
-	cli, err := ghapi.DefaultRESTClient()
+	cli := github.NewClient(nil)
+	repoRelease, _, err := cli.Repositories.GetLatestRelease(context.Background(), "jharshman", "fwsync")
 	if err != nil {
 		return err
 	}
-	latestTag := struct {
-		Tag string `json:"tag_name"`
-	}{}
-	err = cli.Get("repos/jharshman/fwsync/releases/latest", &latestTag)
-	if err != nil {
-		return err
-	}
-	tag := strings.TrimPrefix(latestTag.Tag, "v")
-	if tag != version {
-		fmt.Printf("\n\033[0;32mA new version (%q) is available for fwsync.\033[0m\n", latestTag.Tag)
+	latest := strings.TrimPrefix(repoRelease.GetTagName(), "v")
+	if latest != version {
+		fmt.Printf("\n\033[0;32mA new version (%q) is available for fwsync.\033[0m\n", latest)
 		fmt.Printf("\033[0;32mTo update run:\ncurl https://raw.githubusercontent.com/jharshman/fwsync/master/install.sh | sh\033[0m\n")
 	}
 	return nil
