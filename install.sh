@@ -20,6 +20,7 @@ mkdir -p $HOME/.local/bin
 wget -q $RELEASE
 tar -C $HOME/.local/bin/ --exclude README.md -zxvf fwsync_${OS}_${ARCH}.tar.gz
 chmod +x $HOME/.local/bin/fwsync
+ln -sf $HOME/.local/bin/fwsync $HOME/.local/bin/firewall-sync
 
 rcfile="$HOME/.zshrc"
 if [[ $SHELL == "/bin/bash" ]]; then
