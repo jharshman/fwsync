@@ -28,6 +28,7 @@ fi
 
 # update PATH if required.
 if ! grep -q '# ADDED BY FWSYNC' $rcfile; then
+  echo ""
   echo "export PATH=\$HOME/.local/bin:\$PATH # ADDED BY FWSYNC" >> $rcfile
 fi
 
