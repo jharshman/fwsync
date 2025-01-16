@@ -18,7 +18,7 @@ fi
 # install
 mkdir -p $HOME/.local/bin
 wget -q $RELEASE
-tar -C $HOME/.local/bin/ --exclude README.md -zxvf fwsync_${OS}_${ARCH}.tar.gz
+tar -C $HOME/.local/bin/ --exclude README.md --exclude LICENSE -zxvf fwsync_${OS}_${ARCH}.tar.gz
 chmod +x $HOME/.local/bin/fwsync
 
 rcfile="$HOME/.zshrc"
