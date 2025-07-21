@@ -98,7 +98,7 @@ func synchronize(cfg *user.Config) error {
 	fw := &compute.Firewall{
 		SourceRanges: cfg.SourceIPs,
 	}
-	_, err := auth.GoogleCloudAuthorizedClient.Firewalls.Patch(project, cfg.Name, fw).Do()
+	_, err := auth.GoogleCloudAuthorizedClient.Firewalls.Patch(cfg.Project, cfg.Name, fw).Do()
 	if err != nil {
 		return err
 	}

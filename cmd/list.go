@@ -32,7 +32,7 @@ func List() *cobra.Command {
 			localIPs := cfg.SourceIPs
 
 			// get configured fw ips
-			fw, err := auth.GoogleCloudAuthorizedClient.Firewalls.Get(project, cfg.Name).Do()
+			fw, err := auth.GoogleCloudAuthorizedClient.Firewalls.Get(cfg.Project, cfg.Name).Do()
 			if err != nil {
 				return err
 			}

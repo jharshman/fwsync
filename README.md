@@ -4,7 +4,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/jharshman/fwsync)](https://goreportcard.com/report/github.com/jharshman/fwsync)
 
 Provides CLI interface to update your personal Firewall Rules
-associated with your Cloud Development VM.
+associated with your Google Cloud Development VM.
 
 ## Installation
 
@@ -28,7 +28,7 @@ This by default will display some usage information.
 
 To initialize fwsync type `fwsync init`. This will walk you through steps in
 selecting the correct firewall to manage and will write out fwsync's config file
-which will be located at `$HOME/.bitly_firewall`.
+which will be located at `$HOME/.fwsync`.
 
 ### Update
 If your IP updates and you notice  you've lost access to your CloudVM,
