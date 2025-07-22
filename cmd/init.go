@@ -11,8 +11,7 @@ import (
 )
 
 const (
-	transactionFile = ".bitly_firewall"
-	project         = "bitly-devvm"
+	transactionFile = ".fwsync"
 )
 
 var (
@@ -25,11 +24,12 @@ var (
 // public IP. Any existing source IPs on the firewall rule will be overwritten.
 func Initialize() *cobra.Command {
 	var local *user.Config
-	return &cobra.Command{
+	var gcpProject string
+	initCmd := &cobra.Command{
 		Use:   "init",
 		Short: "Initialize fwsync configuration.",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			firewalls, err := auth.GoogleCloudAuthorizedClient.Firewalls.List(project).Do()
+			firewalls, err := auth.GoogleCloudAuthorizedClient.Firewalls.List(gcpProject).Do()
 			if err != nil {
 				return err
 			}
@@ -74,6 +74,7 @@ func Initialize() *cobra.Command {
 			if err != nil {
 				return err
 			}
+			cfg.Project = gcpProject
 			local = cfg
 
 			// write file
@@ -107,6 +108,9 @@ func Initialize() *cobra.Command {
 			return synchronize(local)
 		},
 	}
+	initCmd.Flags().StringVar(&gcpProject, "project", "", "GCP Project")
+	initCmd.MarkFlagRequired("project")
+	return initCmd
 }
 
 func ask(prompt string, skipRetry bool, check func(val string) bool) (string, bool) {

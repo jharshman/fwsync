@@ -9,6 +9,7 @@ import (
 )
 
 type Config struct {
+	Project   string   `yaml:"project,omitempty"`
 	Name      string   `yaml:"name"`
 	SourceIPs []string `yaml:"ips"`
 }
