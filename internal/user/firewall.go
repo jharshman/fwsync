@@ -4,9 +4,12 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"strings"
 
 	"gopkg.in/yaml.v2"
 )
+
+const IPLimit = 5
 
 type Config struct {
 	Project   string   `yaml:"project,omitempty"`
@@ -18,8 +21,8 @@ func NewConfig(name string, ips ...string) (*Config, error) {
 	if len(ips) == 0 {
 		return nil, errors.New("must have at least one IP")
 	}
-	if len(ips) > 5 {
-		ips = ips[:5]
+	if len(ips) > IPLimit {
+		ips = ips[:IPLimit]
 	}
 	return &Config{
 		Name:      name,
@@ -56,7 +59,7 @@ func (c *Config) Add(ip string) {
 	if ip == "" {
 		return
 	}
-	if len(c.SourceIPs) >= 5 {
+	if len(c.SourceIPs) >= IPLimit {
 		c.SourceIPs = c.SourceIPs[1:]
 	}
 	c.SourceIPs = append(c.SourceIPs, ip)
@@ -92,5 +95,6 @@ func PublicIP() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return string(body[:len(body)-1]), nil
+	ip := strings.TrimSpace(string(body))
+	return ip, nil
 }

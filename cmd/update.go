@@ -34,7 +34,10 @@ func Update() *cobra.Command {
 				return err
 			}
 
-			currentIP, _ := user.PublicIP()
+			currentIP, err := user.PublicIP()
+			if err != nil {
+				return err
+			}
 			_, ipExists := cfg.HasIP(currentIP)
 			if ipExists {
 				skipSync = true
@@ -65,7 +68,7 @@ func Update() *cobra.Command {
 	}
 }
 
-// Sync initiates a manual synchronization of the local configuration stored in ~/.bitly_firewall to the desired GCP Firewall.
+// Sync initiates a manual synchronization of the local configuration stored in ~/.fwsync to the desired GCP Firewall.
 func Sync() *cobra.Command {
 	return &cobra.Command{
 		Use:   "sync",
