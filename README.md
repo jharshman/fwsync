@@ -1,5 +1,7 @@
 # fwsync
 
+![logo](logo.png)
+
 [![CI](https://github.com/jharshman/fwsync/actions/workflows/ci.yaml/badge.svg)](https://github.com/jharshman/fwsync/actions/workflows/ci.yaml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/jharshman/fwsync)](https://goreportcard.com/report/github.com/jharshman/fwsync)
 
