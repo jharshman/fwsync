@@ -46,6 +46,18 @@ func List() *cobra.Command {
 	}
 }
 
+func GetCurrentIP() *cobra.Command {
+	return &cobra.Command{
+		Use:   "get-ip",
+		Short: "Fetches your current public IP.",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			currentIP, err := user.PublicIP()
+			fmt.Printf("current public IP: %s\n", currentIP)
+			return err
+		},
+	}
+}
+
 func prettyPrint(in []string) string {
 	builder := strings.Builder{}
 	for _, v := range in {

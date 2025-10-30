@@ -36,6 +36,7 @@ connecting from and keeps your development VM firewall rule up to date with that
 	rootCmd.AddCommand(cmd.Update())
 	rootCmd.AddCommand(cmd.List())
 	rootCmd.AddCommand(cmd.Sync())
+	rootCmd.AddCommand(cmd.GetCurrentIP())
 	rootCmd.AddCommand(versionCmd)
 
 	if err := rootCmd.Execute(); err != nil {
