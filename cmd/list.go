@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// List prints out the current source IPs configured in ~/.bitly_firewall and the source IPs active on the GCP Firewall.
+// List prints out the current source IPs configured in ~/.fwsync and the source IPs active on the GCP Firewall.
 func List() *cobra.Command {
 	return &cobra.Command{
 		Use:   "list",
