@@ -46,6 +46,9 @@ func List() *cobra.Command {
 	}
 }
 
+// GetCurrentIP will return the current IP and print it to standard out.
+// It invokes the same mechanisms to fetch the IP as the update command.
+// This command will not update the fwsync configuration.
 func GetCurrentIP() *cobra.Command {
 	return &cobra.Command{
 		Use:   "get-ip",
