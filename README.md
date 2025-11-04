@@ -36,3 +36,16 @@ which will be located at `$HOME/.fwsync`.
 If your IP updates and you notice  you've lost access to your CloudVM,
 you can invoke `fwsync update` to automatically detect your new IP address
 and update your Firewall Rule.
+
+### Help
+There's other commands available too! Type `fwsync help` to see the full list of available commands.
+```
+Available Commands:
+  get-ip      Fetches your current public IP.
+  help        Help about any command
+  init        Initialize fwsync configuration.
+  list        Display your firewall's allowed IPs.
+  sync        Synchronize local config with firewall
+  update      Allow a new IP on the firewall.
+  version     Display version information
+```
