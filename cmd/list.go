@@ -5,8 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/jharshman/fwsync/internal/auth"
-	"github.com/jharshman/fwsync/internal/user"
+	"github.com/jharshman/fwsync/config"
 	"github.com/spf13/cobra"
 )
 
@@ -24,7 +23,12 @@ func List() *cobra.Command {
 			}
 			defer f.Close()
 
-			cfg, err := user.NewFromFile(f)
+			cfg, err := config.LoadFromFile(f)
+			if err != nil {
+				return err
+			}
+
+			FirewallClient, err = cfg.AuthForProvider()
 			if err != nil {
 				return err
 			}
@@ -32,11 +36,11 @@ func List() *cobra.Command {
 			localIPs := cfg.SourceIPs
 
 			// get configured fw ips
-			fw, err := auth.GoogleCloudAuthorizedClient.Firewalls.Get(cfg.Project, cfg.Name).Do()
+			fw, err := FirewallClient.Get(cfg.Name)
 			if err != nil {
 				return err
 			}
-			remoteIPs := fw.SourceRanges
+			remoteIPs := fw.AllowedIPs
 
 			// pretty print
 			fmt.Printf("fwsync configurations\n----------------------\nlocal: (%s)\n%s", f.Name(), prettyPrint(localIPs))
@@ -54,7 +58,7 @@ func GetCurrentIP() *cobra.Command {
 		Use:   "get-ip",
 		Short: "Fetches your current public IP.",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			currentIP, err := user.PublicIP()
+			currentIP, err := config.PublicIP()
 			fmt.Printf("current public IP: %s\n", currentIP)
 			return err
 		},

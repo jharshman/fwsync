@@ -8,7 +8,6 @@ import (
 
 	"github.com/google/go-github/v53/github"
 	"github.com/jharshman/fwsync/cmd"
-	"github.com/jharshman/fwsync/internal/auth"
 	"github.com/spf13/cobra"
 )
 
@@ -21,7 +20,6 @@ func main() {
 		Short: "A CLI utility to keep your development VM firewall up to date.",
 		Long: `fwsync uses a local file to keep track of the latest IP addresses you've been
 connecting from and keeps your development VM firewall rule up to date with that list.`,
-		PersistentPreRunE: auth.Auth(),
 	}
 
 	versionCmd := &cobra.Command{

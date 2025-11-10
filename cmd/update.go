@@ -4,10 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jharshman/fwsync/internal/auth"
-	"github.com/jharshman/fwsync/internal/user"
+	"github.com/jharshman/fwsync/config"
 	"github.com/spf13/cobra"
-	"google.golang.org/api/compute/v1"
 )
 
 // Update will intelligently update the firewall rule if the user's public IP has changed and doesn't exist in the
@@ -15,7 +13,7 @@ import (
 func Update() *cobra.Command {
 
 	// Local variable shared between the closures.
-	var local *user.Config
+	var local *config.Config
 	var skipSync bool
 
 	return &cobra.Command{
@@ -29,12 +27,17 @@ func Update() *cobra.Command {
 			}
 			defer f.Close()
 
-			cfg, err := user.NewFromFile(f)
+			cfg, err := config.LoadFromFile(f)
 			if err != nil {
 				return err
 			}
 
-			currentIP, err := user.PublicIP()
+			FirewallClient, err = cfg.AuthForProvider()
+			if err != nil {
+				return err
+			}
+
+			currentIP, err := config.PublicIP()
 			if err != nil {
 				return err
 			}
@@ -81,7 +84,12 @@ func Sync() *cobra.Command {
 			}
 			defer f.Close()
 
-			cfg, err := user.NewFromFile(f)
+			cfg, err := config.LoadFromFile(f)
+			if err != nil {
+				return err
+			}
+
+			FirewallClient, err = cfg.AuthForProvider()
 			if err != nil {
 				return err
 			}
@@ -92,18 +100,11 @@ func Sync() *cobra.Command {
 }
 
 // synchronize will use the local configuration update the desired firewall rule.
-func synchronize(cfg *user.Config) error {
+func synchronize(config *config.Config) error {
 	// CIDR notation required by GoogleAPIs.
-	for idx := range cfg.SourceIPs {
-		cfg.SourceIPs[idx] = cfg.SourceIPs[idx] + "/32"
+	for idx := range config.SourceIPs {
+		config.SourceIPs[idx] = config.SourceIPs[idx] + "/32"
 	}
 
-	fw := &compute.Firewall{
-		SourceRanges: cfg.SourceIPs,
-	}
-	_, err := auth.GoogleCloudAuthorizedClient.Firewalls.Patch(cfg.Project, cfg.Name, fw).Do()
-	if err != nil {
-		return err
-	}
-	return nil
+	return FirewallClient.Update(config.Name, config.SourceIPs)
 }
