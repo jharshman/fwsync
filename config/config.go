@@ -1,53 +1,74 @@
-package user
+package config
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/jharshman/fwsync/internal/providers/gcp"
+	"github.com/jharshman/fwsync/internal/providers/generic"
 	"gopkg.in/yaml.v2"
 )
 
-// IPLimit enforces that there only be 5 IPs at any given time
-// configured on the firewall.
-const IPLimit = 5
+const (
+	ipLimit = 5
+	ipURL   = "https://ipv4.icanhazip.com"
+)
 
-// IPURL use https://icanhazip.com/.
-// Reliable and owned and operated by cloudflare.
-const IPURL = "https://ipv4.icanhazip.com"
+var (
+	// providers
+	providerGoogle = "google"
 
-// Config provides the structure of the local configuration file for fwsync.
+	// todo: implement the following providers
+	//providerAWS          = "amazon"
+	//providerAzure        = "azure"
+	//providerDigitalOcean = "digitalocean"
+	//providerLinode       = "linode"
+)
+
+// Config describes the fwsync configuration. It is used to hold basic information about the
+// firewall and the desired IPs that are to be allowed.
 type Config struct {
-	Project   string   `yaml:"project,omitempty"`
+	Provider  string   `yaml:"provider"`
+	Project   string   `yaml:"project"`
 	Name      string   `yaml:"name"`
 	SourceIPs []string `yaml:"ips"`
 }
 
-// NewConfig creates a new fwsync configuration.
-func NewConfig(name string, ips ...string) (*Config, error) {
-	if len(ips) == 0 {
-		return nil, errors.New("must have at least one IP")
+// New creates a new Config and returns a pointer to it.
+func New(opts ...configOpts) *Config {
+	cfg := &Config{}
+	for _, opt := range opts {
+		opt(cfg)
 	}
-	if len(ips) > IPLimit {
-		ips = ips[:IPLimit]
-	}
-	return &Config{
-		Name:      name,
-		SourceIPs: ips,
-	}, nil
+	return cfg
 }
 
-// NewFromFile loads an existing configuration from file.
-func NewFromFile(r io.Reader) (*Config, error) {
+// LoadFromFile creates a new Config from the .fwsync configuration file.
+func LoadFromFile(r io.Reader) (*Config, error) {
 	config := &Config{}
 	err := yaml.NewDecoder(r).Decode(config)
 	if err != nil {
 		return nil, err
 	}
 	return config, nil
+}
+
+// AuthForProvider authenticates for a given supported Cloud Provider and returns the
+// provider's implementation of generic.Firewaller.
+func (c *Config) AuthForProvider() (generic.Firewaller, error) {
+	var client generic.Firewaller
+	var err error
+	switch c.Provider {
+	case providerGoogle:
+		client, err = gcp.New(c.Project)
+	default:
+		err = fmt.Errorf("invalid provider: %s", c.Provider)
+	}
+	return client, err
 }
 
 // Write will write the fwsync configuration from memory to disk.
@@ -71,12 +92,12 @@ func (c *Config) HasIP(ip string) (int, bool) {
 
 // Add will add the given IP to the configuration file.
 // If the new IP puts the number of IPs held in the configuration file
-// over the limit defined by IPLimit then the oldest IP is removed.
+// over the limit defined by ipLimit then the oldest IP is removed.
 func (c *Config) Add(ip string) {
 	if ip == "" {
 		return
 	}
-	if len(c.SourceIPs) >= IPLimit {
+	if len(c.SourceIPs) >= ipLimit {
 		c.SourceIPs = c.SourceIPs[1:]
 	}
 	c.SourceIPs = append(c.SourceIPs, ip)
@@ -101,12 +122,12 @@ func (c *Config) Remove(ip string) {
 	c.SourceIPs = newIPs
 }
 
-// PublicIP fetches the current public IP from the URL defined by IPURL.
+// PublicIP fetches the current public IP from the URL defined by ipURL.
 // On error, it will return an empty string and error.
 func PublicIP() (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	req, err := http.NewRequestWithContext(ctx, "GET", IPURL, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", ipURL, nil)
 	if err != nil {
 		return "", err
 	}

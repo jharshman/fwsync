@@ -1,4 +1,4 @@
-package user
+package config
 
 import (
 	"bytes"
@@ -14,7 +14,6 @@ func TestNewConfig(t *testing.T) {
 		argFwID     string
 		argIPs      []string
 		expected    *Config
-		hasError    bool
 	}{
 		{
 			description: "new fwsync config max ips",
@@ -36,7 +35,6 @@ func TestNewConfig(t *testing.T) {
 					"5.5.5.5",
 				},
 			},
-			hasError: false,
 		},
 		{
 			description: "new fwsync config min ips",
@@ -50,14 +48,14 @@ func TestNewConfig(t *testing.T) {
 					"1.1.1.1",
 				},
 			},
-			hasError: false,
 		},
 		{
 			description: "new fwsync config no ips",
 			argFwID:     "firstname-lastname-firewall-rule",
-			argIPs:      []string{},
-			expected:    nil,
-			hasError:    true,
+			argIPs:      nil,
+			expected: &Config{
+				Name: "firstname-lastname-firewall-rule",
+			},
 		},
 		{
 			description: "new fwsync config too many ips",
@@ -80,7 +78,6 @@ func TestNewConfig(t *testing.T) {
 					"5.5.5.5",
 				},
 			},
-			hasError: true,
 		},
 	}
 
@@ -88,10 +85,10 @@ func TestNewConfig(t *testing.T) {
 		tc := tc
 		t.Run(tc.description, func(t *testing.T) {
 			is := is.New(t)
-			got, err := NewConfig(tc.argFwID, tc.argIPs...)
-			if !tc.hasError {
-				is.NoErr(err)
-			}
+			got := New(
+				WithFirewall(tc.argFwID),
+				WithSourceIPs(tc.argIPs...))
+
 			is.Equal(got, tc.expected)
 		})
 	}
@@ -107,7 +104,7 @@ ips:
 `)
 	is := is.New(t)
 	buf := bytes.NewBuffer(in)
-	got, err := NewFromFile(buf)
+	got, err := LoadFromFile(buf)
 	is.NoErr(err)
 	is.Equal(got, &Config{
 		Name: "firstname-lastname-firewall-rule",
@@ -120,13 +117,19 @@ ips:
 }
 
 func TestConfig_Write(t *testing.T) {
-	expected := []byte(`name: firstname-lastname-firewall-rule
+	expected := []byte(`provider: google
+project: myproject
+name: firstname-lastname-firewall-rule
 ips:
 - 1.1.1.1
 - 2.2.2.2
 - 3.3.3.3
 `)
-	cfg, _ := NewConfig("firstname-lastname-firewall-rule", "1.1.1.1", "2.2.2.2", "3.3.3.3")
+	cfg := New(
+		WithProvider("google"),
+		WithProject("myproject"),
+		WithFirewall("firstname-lastname-firewall-rule"),
+		WithSourceIPs("1.1.1.1", "2.2.2.2", "3.3.3.3"))
 	var b []byte
 	got := bytes.NewBuffer(b)
 	cfg.Write(got)

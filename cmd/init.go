@@ -5,8 +5,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/jharshman/fwsync/internal/auth"
-	"github.com/jharshman/fwsync/internal/user"
+	"github.com/jharshman/fwsync/config"
 	"github.com/spf13/cobra"
 )
 
@@ -23,31 +22,43 @@ var (
 // the firewall rule with his or her name and then will update that firewall rule with their current
 // public IP. Any existing source IPs on the firewall rule will be overwritten.
 func Initialize() *cobra.Command {
-	var local *user.Config
-	var gcpProject string
+	var local *config.Config
+	var cloudProvider string
+	var cloudProject string
 	initCmd := &cobra.Command{
 		Use:   "init",
 		Short: "Initialize fwsync configuration.",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			firewalls, err := auth.GoogleCloudAuthorizedClient.Firewalls.List(gcpProject).Do()
+
+			cfg := config.New(
+				config.WithProvider(cloudProvider),
+				config.WithProject(cloudProject))
+
+			var err error
+			FirewallClient, err = cfg.AuthForProvider()
 			if err != nil {
 				return err
 			}
 
-			for idx, fw := range firewalls.Items {
-				fmt.Printf("%d:\t%s\n", idx, fw.Name)
+			firewalls, err := FirewallClient.List()
+			if err != nil {
+				return err
+			}
+
+			for idx, fw := range firewalls {
+				fmt.Printf("%d:\t%s\n", idx, fw)
 			}
 		ASK:
-			selection, ok := ask(fmt.Sprintf("Select Firewall with your name 0-%d: ", len(firewalls.Items)), false, func(val string) bool {
+			selection, ok := ask(fmt.Sprintf("Select Firewall with your name 0-%d: ", len(firewalls)), false, func(val string) bool {
 				i, err := strconv.Atoi(val)
 				if err != nil {
 					return false
 				}
-				if i > len(firewalls.Items) || i < 0 {
+				if i >= len(firewalls) || i < 0 {
 					return false
 				}
 
-				_, ok := ask(fmt.Sprintf("You've selected %s, is that correct? [Y/n]: ", firewalls.Items[i].Name), true, func(val string) bool {
+				_, ok := ask(fmt.Sprintf("You've selected %s, is that correct? [Y/n]: ", firewalls[i]), true, func(val string) bool {
 					switch val {
 					case "Y", "y", "yes", "":
 					case "N", "n", "no":
@@ -68,13 +79,11 @@ func Initialize() *cobra.Command {
 				return err
 			}
 
-			ip, _ := user.PublicIP()
+			ip, _ := config.PublicIP()
 			fmt.Printf("IP determined to be: %s\n", ip)
-			cfg, err := user.NewConfig(firewalls.Items[fwSelection].Name, ip)
-			if err != nil {
-				return err
-			}
-			cfg.Project = gcpProject
+			cfg.Name = firewalls[fwSelection]
+			cfg.SourceIPs = []string{ip}
+
 			local = cfg
 
 			// write file
@@ -108,7 +117,9 @@ func Initialize() *cobra.Command {
 			return synchronize(local)
 		},
 	}
-	initCmd.Flags().StringVar(&gcpProject, "project", "", "GCP Project")
+	initCmd.Flags().StringVar(&cloudProvider, "provider", "", "Cloud Provider")
+	initCmd.Flags().StringVar(&cloudProject, "project", "", "Cloud Project")
+	initCmd.MarkFlagRequired("provider")
 	initCmd.MarkFlagRequired("project")
 	return initCmd
 }
