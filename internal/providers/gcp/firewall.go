@@ -26,7 +26,7 @@ func New(project string) (*Client, error) {
 // List returns all the available Firewall Policies in the Project.
 // It distills that information into a simpler generic.Firewall type and
 // returns it to the caller.
-func (c *Client) List() ([]string, error) {
+func (c *Client) List(ctx context.Context) ([]string, error) {
 	fw, err := c.conn.Firewalls.List(c.project).Do()
 	if err != nil {
 		return nil, err
@@ -41,7 +41,7 @@ func (c *Client) List() ([]string, error) {
 }
 
 // Get returns a generic.Firewall if one exists by the given name parameter.
-func (c *Client) Get(name string) (*generic.Firewall, error) {
+func (c *Client) Get(ctx context.Context, name string) (*generic.Firewall, error) {
 	fw, err := c.conn.Firewalls.Get(c.project, name).Do()
 	if err != nil {
 		return nil, err
@@ -57,7 +57,7 @@ func (c *Client) Get(name string) (*generic.Firewall, error) {
 
 // Update performs a Patch operation on an existing Firewall and sets the SourceRanges of allowed IPs
 // to the provided parameter sourceRanges.
-func (c *Client) Update(name string, sourceRanges []string) error {
+func (c *Client) Update(ctx context.Context, name string, sourceRanges []string) error {
 	_, err := c.conn.Firewalls.Patch(c.project, name, &compute.Firewall{SourceRanges: sourceRanges}).Do()
 	return err
 }

@@ -12,6 +12,7 @@ func TestNewConfig(t *testing.T) {
 	tests := []struct {
 		description string
 		argFwID     string
+		argIpLimit  int
 		argIPs      []string
 		expected    *Config
 	}{
@@ -26,7 +27,8 @@ func TestNewConfig(t *testing.T) {
 				"5.5.5.5",
 			},
 			expected: &Config{
-				Name: "firstname-lastname-firewall-rule",
+				Name:    "firstname-lastname-firewall-rule",
+				IPLimit: defaultIPLimit,
 				SourceIPs: []string{
 					"1.1.1.1",
 					"2.2.2.2",
@@ -43,7 +45,8 @@ func TestNewConfig(t *testing.T) {
 				"1.1.1.1",
 			},
 			expected: &Config{
-				Name: "firstname-lastname-firewall-rule",
+				Name:    "firstname-lastname-firewall-rule",
+				IPLimit: defaultIPLimit,
 				SourceIPs: []string{
 					"1.1.1.1",
 				},
@@ -54,7 +57,8 @@ func TestNewConfig(t *testing.T) {
 			argFwID:     "firstname-lastname-firewall-rule",
 			argIPs:      nil,
 			expected: &Config{
-				Name: "firstname-lastname-firewall-rule",
+				Name:    "firstname-lastname-firewall-rule",
+				IPLimit: defaultIPLimit,
 			},
 		},
 		{
@@ -69,7 +73,8 @@ func TestNewConfig(t *testing.T) {
 				"6.6.6.6.",
 			},
 			expected: &Config{
-				Name: "firstname-lastname-firewall-rule",
+				Name:    "firstname-lastname-firewall-rule",
+				IPLimit: defaultIPLimit,
 				SourceIPs: []string{
 					"1.1.1.1",
 					"2.2.2.2",
@@ -119,6 +124,7 @@ ips:
 func TestConfig_Write(t *testing.T) {
 	expected := []byte(`provider: google
 project: myproject
+ip_limit: 5
 name: firstname-lastname-firewall-rule
 ips:
 - 1.1.1.1
@@ -183,7 +189,7 @@ func TestConfig_Add(t *testing.T) {
 		description string
 		ip          string
 		cfg         *Config
-		expect      *Config
+		expectedIPs []string
 	}{
 		{
 			description: "Empty parameter",
@@ -192,10 +198,7 @@ func TestConfig_Add(t *testing.T) {
 				Name:      "firstname-lastname-firewall-rule",
 				SourceIPs: []string{"1.1.1.1"},
 			},
-			expect: &Config{
-				Name:      "firstname-lastname-firewall-rule",
-				SourceIPs: []string{"1.1.1.1"},
-			},
+			expectedIPs: []string{"1.1.1.1"},
 		},
 		{
 			description: "Add IP",
@@ -204,10 +207,7 @@ func TestConfig_Add(t *testing.T) {
 				Name:      "firstname-lastname-firewall-rule",
 				SourceIPs: []string{"1.1.1.1"},
 			},
-			expect: &Config{
-				Name:      "firstname-lastname-firewall-rule",
-				SourceIPs: []string{"1.1.1.1", "2.2.2.2"},
-			},
+			expectedIPs: []string{"1.1.1.1", "2.2.2.2"},
 		},
 		{
 			description: "Add IP on full list",
@@ -216,10 +216,7 @@ func TestConfig_Add(t *testing.T) {
 				Name:      "firstname-lastname-firewall-rule",
 				SourceIPs: []string{"1.1.1.1", "2.2.2.2", "3.3.3.3", "4.4.4.4", "5.5.5.5"},
 			},
-			expect: &Config{
-				Name:      "firstname-lastname-firewall-rule",
-				SourceIPs: []string{"2.2.2.2", "3.3.3.3", "4.4.4.4", "5.5.5.5", "6.6.6.6"},
-			},
+			expectedIPs: []string{"2.2.2.2", "3.3.3.3", "4.4.4.4", "5.5.5.5", "6.6.6.6"},
 		},
 	}
 
@@ -228,7 +225,7 @@ func TestConfig_Add(t *testing.T) {
 		t.Run(tc.description, func(t *testing.T) {
 			is := is.New(t)
 			tc.cfg.Add(tc.ip)
-			is.Equal(tc.cfg, tc.expect)
+			is.Equal(tc.cfg.SourceIPs, tc.expectedIPs)
 		})
 	}
 

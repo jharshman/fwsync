@@ -1,9 +1,11 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/jharshman/fwsync/config"
 	"github.com/spf13/cobra"
@@ -25,14 +27,20 @@ func Initialize() *cobra.Command {
 	var local *config.Config
 	var cloudProvider string
 	var cloudProject string
+	var ipLimit int
 	initCmd := &cobra.Command{
 		Use:   "init",
 		Short: "Initialize fwsync configuration.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 
+			if cloudProvider == config.ProviderGoogle {
+				return fmt.Errorf("the provider: %s requires the --project argument", config.ProviderGoogle)
+			}
+
 			cfg := config.New(
 				config.WithProvider(cloudProvider),
-				config.WithProject(cloudProject))
+				config.WithProject(cloudProject),
+				config.WithIPLimit(ipLimit))
 
 			var err error
 			FirewallClient, err = cfg.AuthForProvider()
@@ -40,7 +48,10 @@ func Initialize() *cobra.Command {
 				return err
 			}
 
-			firewalls, err := FirewallClient.List()
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+			defer cancel()
+
+			firewalls, err := FirewallClient.List(ctx)
 			if err != nil {
 				return err
 			}
@@ -49,7 +60,7 @@ func Initialize() *cobra.Command {
 				fmt.Printf("%d:\t%s\n", idx, fw)
 			}
 		ASK:
-			selection, ok := ask(fmt.Sprintf("Select Firewall with your name 0-%d: ", len(firewalls)), false, func(val string) bool {
+			selection, ok := ask(fmt.Sprintf("Select Firewall to use 0-%d: ", len(firewalls)), false, func(val string) bool {
 				i, err := strconv.Atoi(val)
 				if err != nil {
 					return false
@@ -119,8 +130,8 @@ func Initialize() *cobra.Command {
 	}
 	initCmd.Flags().StringVar(&cloudProvider, "provider", "", "Cloud Provider")
 	initCmd.Flags().StringVar(&cloudProject, "project", "", "Cloud Project")
+	initCmd.Flags().IntVar(&ipLimit, "ip-limit", 5, "IP Limit")
 	initCmd.MarkFlagRequired("provider")
-	initCmd.MarkFlagRequired("project")
 	return initCmd
 }
 
