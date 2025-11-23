@@ -26,12 +26,16 @@ func WithFirewall(name string) configOpts {
 // WithSourceIPs sets the allowed IPs in the fwsync configuration.
 func WithSourceIPs(sourceIPs ...string) configOpts {
 	return func(cfg *Config) {
-		// Silently remove the extra IPs.
-		// This probably isn't the best solution because it doesn't give any
-		// feedback to the caller.
-		if len(sourceIPs) > ipLimit {
-			sourceIPs = sourceIPs[:ipLimit]
+		if len(sourceIPs) > cfg.IPLimit {
+			sourceIPs = sourceIPs[:cfg.IPLimit]
 		}
 		cfg.SourceIPs = sourceIPs
+	}
+}
+
+// WithIPLimit sets the number of allowed IPs.
+func WithIPLimit(limit int) configOpts {
+	return func(cfg *Config) {
+		cfg.IPLimit = limit
 	}
 }

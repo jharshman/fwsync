@@ -1,9 +1,11 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/jharshman/fwsync/config"
 	"github.com/spf13/cobra"
@@ -35,8 +37,11 @@ func List() *cobra.Command {
 
 			localIPs := cfg.SourceIPs
 
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+			defer cancel()
+
 			// get configured fw ips
-			fw, err := FirewallClient.Get(cfg.Name)
+			fw, err := FirewallClient.Get(ctx, cfg.Name)
 			if err != nil {
 				return err
 			}

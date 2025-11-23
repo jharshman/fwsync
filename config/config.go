@@ -10,30 +10,32 @@ import (
 
 	"github.com/jharshman/fwsync/internal/providers/gcp"
 	"github.com/jharshman/fwsync/internal/providers/generic"
+	"github.com/jharshman/fwsync/internal/providers/linode"
 	"gopkg.in/yaml.v2"
 )
 
 const (
-	ipLimit = 5
-	ipURL   = "https://ipv4.icanhazip.com"
+	defaultIPLimit = 5
+	ipURL          = "https://ipv4.icanhazip.com"
 )
 
 var (
 	// providers
-	providerGoogle = "google"
+	ProviderGoogle = "google"
+	ProviderLinode = "linode"
 
 	// todo: implement the following providers
 	//providerAWS          = "amazon"
 	//providerAzure        = "azure"
 	//providerDigitalOcean = "digitalocean"
-	//providerLinode       = "linode"
 )
 
 // Config describes the fwsync configuration. It is used to hold basic information about the
 // firewall and the desired IPs that are to be allowed.
 type Config struct {
 	Provider  string   `yaml:"provider"`
-	Project   string   `yaml:"project"`
+	Project   string   `yaml:"project,omitempty"`
+	IPLimit   int      `yaml:"ip_limit,omitempty"`
 	Name      string   `yaml:"name"`
 	SourceIPs []string `yaml:"ips"`
 }
@@ -41,9 +43,12 @@ type Config struct {
 // New creates a new Config and returns a pointer to it.
 func New(opts ...configOpts) *Config {
 	cfg := &Config{}
+	cfg.IPLimit = defaultIPLimit // always set the IPLimit equal to the defaultIPLimit.
+
 	for _, opt := range opts {
 		opt(cfg)
 	}
+
 	return cfg
 }
 
@@ -63,8 +68,10 @@ func (c *Config) AuthForProvider() (generic.Firewaller, error) {
 	var client generic.Firewaller
 	var err error
 	switch c.Provider {
-	case providerGoogle:
+	case ProviderGoogle:
 		client, err = gcp.New(c.Project)
+	case ProviderLinode:
+		client, err = linode.New()
 	default:
 		err = fmt.Errorf("invalid provider: %s", c.Provider)
 	}
@@ -97,7 +104,11 @@ func (c *Config) Add(ip string) {
 	if ip == "" {
 		return
 	}
-	if len(c.SourceIPs) >= ipLimit {
+	if c.IPLimit == 0 {
+		// ip limit cannot be 0
+		c.IPLimit = defaultIPLimit
+	}
+	if len(c.SourceIPs) >= c.IPLimit {
 		c.SourceIPs = c.SourceIPs[1:]
 	}
 	c.SourceIPs = append(c.SourceIPs, ip)

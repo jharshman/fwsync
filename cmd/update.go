@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/jharshman/fwsync/config"
 	"github.com/spf13/cobra"
@@ -106,5 +108,8 @@ func synchronize(config *config.Config) error {
 		config.SourceIPs[idx] = config.SourceIPs[idx] + "/32"
 	}
 
-	return FirewallClient.Update(config.Name, config.SourceIPs)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	return FirewallClient.Update(ctx, config.Name, config.SourceIPs)
 }
