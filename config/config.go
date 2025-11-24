@@ -63,9 +63,9 @@ func LoadFromFile(r io.Reader) (*Config, error) {
 }
 
 // AuthForProvider authenticates for a given supported Cloud Provider and returns the
-// provider's implementation of generic.Firewaller.
-func (c *Config) AuthForProvider() (generic.Firewaller, error) {
-	var client generic.Firewaller
+// provider's implementation of generic.Provider.
+func (c *Config) AuthForProvider() (generic.Provider, error) {
+	var client generic.Provider
 	var err error
 	switch c.Provider {
 	case ProviderGoogle:

@@ -5,6 +5,6 @@ import (
 )
 
 var (
-	// FirewallClient holds the initialized provider client implementing the Firewaller interface.
-	FirewallClient generic.Firewaller
+	// FirewallClient holds the initialized provider client implementing the Provider interface.
+	FirewallClient generic.Provider
 )

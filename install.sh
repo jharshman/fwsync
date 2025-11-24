@@ -21,13 +21,6 @@ wget -q $RELEASE
 tar -C $HOME/.local/bin/ --exclude README.md --exclude LICENSE -zxvf fwsync_${OS}_${ARCH}.tar.gz
 chmod +x $HOME/.local/bin/fwsync
 
-# migrate existing bitly users' transaction file from .bitly_firewall to .fwsync
-if [[ -e $HOME/.bitly_firewall ]]; then
-  echo "project: bitly-devvm" > $HOME/.fwsync
-  cat $HOME/.bitly_firewall >> $HOME/.fwsync
-  rm -f $HOME/.bitly_firewall
-fi
-
 rcfile="$HOME/.zshrc"
 if [[ $SHELL == "/bin/bash" ]]; then
   rcfile="$HOME/.bashrc"
