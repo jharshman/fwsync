@@ -9,7 +9,7 @@ import (
 	"github.com/linode/linodego"
 )
 
-// Client is an implementation of generic.Firewaller for Akamai Linode.
+// Client is an implementation of generic.Provider for Akamai Linode.
 type Client struct {
 	conn *linodego.Client
 }
@@ -25,19 +25,23 @@ func New() (*Client, error) {
 }
 
 // List will list all firewalls present in the account. It returns an unfiltered list of firewall names.
-func (c Client) List(ctx context.Context) ([]string, error) {
+func (c Client) List(ctx context.Context) ([]generic.Firewall, error) {
 	fw, err := c.conn.ListFirewalls(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	// process firewalls
-	names := make([]string, 0, len(fw))
+	fws := make([]generic.Firewall, 0, len(fw))
 	for _, v := range fw {
-		names = append(names, v.Label)
+		fws = append(fws, generic.Firewall{
+			Name:                 v.Label,
+			AllowedIPv4Addresses: *v.Rules.Inbound[0].Addresses.IPv4, // this is sketch since it may or may not exist at that index.
+			Misc:                 map[string]any{"id": v.ID},
+		})
 	}
 
-	return names, nil
+	return fws, nil
 }
 
 // Get searches for a specific firewall in the account by name. It then returns a pointer to a *generic.Firewall which
@@ -59,9 +63,9 @@ func (c Client) Get(ctx context.Context, name string) (*generic.Firewall, error)
 	}
 
 	return &generic.Firewall{
-		Name:       fw[0].Label,
-		UUID:       fw[0].ID,
-		AllowedIPs: *fw[0].Rules.Inbound[0].Addresses.IPv4,
+		Name:                 fw[0].Label,
+		Misc:                 map[string]any{"id": fw[0].ID},
+		AllowedIPv4Addresses: *fw[0].Rules.Inbound[0].Addresses.IPv4,
 	}, nil
 }
 
@@ -73,13 +77,18 @@ func (c Client) Update(ctx context.Context, name string, sourceRanges []string) 
 		return err
 	}
 
-	_, err = c.conn.UpdateFirewallRules(ctx, fw.UUID, linodego.FirewallRuleSet{
+	id, ok := fw.Misc["id"].(int)
+	if !ok {
+		return fmt.Errorf("no id found")
+	}
+
+	_, err = c.conn.UpdateFirewallRules(ctx, id, linodego.FirewallRuleSet{
 		InboundPolicy:  "ACCEPT",
 		OutboundPolicy: "ACCEPT",
 		Inbound: []linodego.FirewallRule{
 			{
 				Action:   "ACCEPT",
-				Label:    name,
+				Label:    fw.Name,
 				Protocol: "TCP",
 				Addresses: linodego.NetworkAddresses{
 					IPv4: &sourceRanges,

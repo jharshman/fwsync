@@ -6,7 +6,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/jharshman/fwsync)](https://goreportcard.com/report/github.com/jharshman/fwsync)
 
 Provides CLI interface to update your personal Firewall Rules
-associated with your Google Cloud Development VM.
+associated with your Cloud Based Development VM.
 
 ## Installation
 
@@ -16,13 +16,6 @@ $ curl https://raw.githubusercontent.com/jharshman/fwsync/master/install.sh | sh
 ```
 
 ## Usage
-
-### Authentication
-The reccomended method of authentication is to run the following command:
-
-```bash
-$ gcloud auth application-default login
-```
 
 ### Init
 After installing, you can invoke the CLI by typing `fwsync` in your terminal.
@@ -49,3 +42,11 @@ Available Commands:
   update      Allow a new IP on the firewall.
   version     Display version information
 ```
+
+## Supported Providers
+
+- [Google Cloud](./docs/google_cloud.md)
+- [Akamai/Linode](./docs/akamai.md)
+
+> Note: I am currently working on implementing more providers like AWS, Azure, and DigitalOcean.
+> Contributions are welcome.

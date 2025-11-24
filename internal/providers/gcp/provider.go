@@ -8,7 +8,7 @@ import (
 )
 
 // Client is a simple type containing a GCP client connection to compute.Service. This
-// type implements the generic.Firewaller interface.
+// type implements the generic.Provider interface.
 type Client struct {
 	conn    *compute.Service
 	project string
@@ -26,18 +26,21 @@ func New(project string) (*Client, error) {
 // List returns all the available Firewall Policies in the Project.
 // It distills that information into a simpler generic.Firewall type and
 // returns it to the caller.
-func (c *Client) List(ctx context.Context) ([]string, error) {
+func (c *Client) List(ctx context.Context) ([]generic.Firewall, error) {
 	fw, err := c.conn.Firewalls.List(c.project).Do()
 	if err != nil {
 		return nil, err
 	}
 
-	names := make([]string, 0, len(fw.Items))
+	fws := make([]generic.Firewall, 0, len(fw.Items))
 	for _, item := range fw.Items {
-		names = append(names, item.Name)
+		fws = append(fws, generic.Firewall{
+			Name:                 item.Name,
+			AllowedIPv4Addresses: item.SourceRanges,
+		})
 	}
 
-	return names, nil
+	return fws, nil
 }
 
 // Get returns a generic.Firewall if one exists by the given name parameter.
@@ -47,12 +50,10 @@ func (c *Client) Get(ctx context.Context, name string) (*generic.Firewall, error
 		return nil, err
 	}
 
-	userFirewall := &generic.Firewall{
-		Name:       fw.Name,
-		AllowedIPs: fw.SourceRanges,
-	}
-
-	return userFirewall, nil
+	return &generic.Firewall{
+		Name:                 fw.Name,
+		AllowedIPv4Addresses: fw.SourceRanges,
+	}, nil
 }
 
 // Update performs a Patch operation on an existing Firewall and sets the SourceRanges of allowed IPs

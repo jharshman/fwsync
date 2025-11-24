@@ -45,7 +45,7 @@ func List() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			remoteIPs := fw.AllowedIPs
+			remoteIPs := fw.AllowedIPv4Addresses
 
 			// pretty print
 			fmt.Printf("fwsync configurations\n----------------------\nlocal: (%s)\n%s", f.Name(), prettyPrint(localIPs))
