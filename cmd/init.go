@@ -28,6 +28,7 @@ func Initialize() *cobra.Command {
 	var cloudProvider string
 	var cloudProject string
 	var ipLimit int
+
 	initCmd := &cobra.Command{
 		Use:   "init",
 		Short: "Initialize fwsync configuration.",
@@ -57,8 +58,9 @@ func Initialize() *cobra.Command {
 			}
 
 			for idx, fw := range firewalls {
-				fmt.Printf("%d:\t%s\n", idx, fw)
+				fmt.Printf("%d:\t%s\n", idx, fw.Name)
 			}
+
 		ASK:
 			selection, ok := ask(fmt.Sprintf("Select Firewall to use 0-%d: ", len(firewalls)), false, func(val string) bool {
 				i, err := strconv.Atoi(val)
@@ -69,7 +71,7 @@ func Initialize() *cobra.Command {
 					return false
 				}
 
-				_, ok := ask(fmt.Sprintf("You've selected %s, is that correct? [Y/n]: ", firewalls[i]), true, func(val string) bool {
+				_, ok := ask(fmt.Sprintf("You've selected %s, is that correct? [Y/n]: ", firewalls[i].Name), true, func(val string) bool {
 					switch val {
 					case "Y", "y", "yes", "":
 					case "N", "n", "no":
@@ -92,7 +94,7 @@ func Initialize() *cobra.Command {
 
 			ip, _ := config.PublicIP()
 			fmt.Printf("IP determined to be: %s\n", ip)
-			cfg.Name = firewalls[fwSelection]
+			cfg.Name = firewalls[fwSelection].Name
 			cfg.SourceIPs = []string{ip}
 
 			local = cfg
