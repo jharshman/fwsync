@@ -30,6 +30,9 @@ connecting from and keeps your development VM firewall rule up to date with that
 		},
 	}
 
+	// disable the default command that generates shell completions
+	rootCmd.CompletionOptions.DisableDefaultCmd = true
+
 	rootCmd.AddCommand(cmd.Initialize())
 	rootCmd.AddCommand(cmd.Update())
 	rootCmd.AddCommand(cmd.List())
@@ -38,14 +41,14 @@ connecting from and keeps your development VM firewall rule up to date with that
 	rootCmd.AddCommand(versionCmd)
 
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintf(os.Stderr, "Error running command: %q", err)
 		os.Exit(1)
 	}
-	fmt.Println("Operation complete, no errors.")
 
 	err := notifyIfUpdateAvailable()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error checking for updates to fwsync: %q", err)
+		fmt.Fprintf(os.Stderr, "Error checking for updates: %q", err)
+		os.Exit(1)
 	}
 }
 
