@@ -34,7 +34,7 @@ func Initialize() *cobra.Command {
 		Short: "Initialize fwsync configuration.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 
-			if cloudProvider == config.ProviderGoogle {
+			if cloudProject == "" && cloudProvider == config.ProviderGoogle {
 				return fmt.Errorf("the provider: %s requires the --project argument", config.ProviderGoogle)
 			}
 
