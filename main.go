@@ -20,6 +20,7 @@ func main() {
 		Short: "A CLI utility to keep your development VM firewall up to date.",
 		Long: `fwsync uses a local file to keep track of the latest IP addresses you've been
 connecting from and keeps your development VM firewall rule up to date with that list.`,
+		SilenceUsage: true,
 	}
 
 	versionCmd := &cobra.Command{
@@ -41,13 +42,13 @@ connecting from and keeps your development VM firewall rule up to date with that
 	rootCmd.AddCommand(versionCmd)
 
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintf(os.Stderr, "Error running command: %q", err)
+		fmt.Fprintf(os.Stderr, "Error running command: %q\n", err)
 		os.Exit(1)
 	}
 
 	err := notifyIfUpdateAvailable()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error checking for updates: %q", err)
+		fmt.Fprintf(os.Stderr, "Error checking for updates: %q\n", err)
 		os.Exit(1)
 	}
 }

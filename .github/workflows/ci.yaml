@@ -14,6 +14,11 @@ jobs:
         with:
           go-version: '1.23'
 
+      - name: Install go-task
+        uses: go-task/setup-task@v1
+        with:
+          version: 3.x
+
       - name: Test
         run: go test -v ./...
 
@@ -28,6 +33,13 @@ jobs:
         with:
           go-version: '1.23'
 
+      - name: Install go-task
+        uses: go-task/setup-task@v1
+        with:
+          version: 3.x
+
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v3.4.0
+        uses: golangci/golangci-lint-action@v9.2.0
+        with:
+          version: v2.7.0
 

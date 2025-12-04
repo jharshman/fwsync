@@ -30,8 +30,9 @@ func Initialize() *cobra.Command {
 	var ipLimit int
 
 	initCmd := &cobra.Command{
-		Use:   "init",
-		Short: "Initialize fwsync configuration.",
+		SilenceErrors: true, // errors are always propogated to main, no need to print again
+		Use:           "init",
+		Short:         "Initialize fwsync configuration.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			if cloudProject == "" && cloudProvider == config.ProviderGoogle {

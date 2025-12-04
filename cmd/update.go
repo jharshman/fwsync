@@ -19,8 +19,9 @@ func Update() *cobra.Command {
 	var skipSync bool
 
 	return &cobra.Command{
-		Use:   "update",
-		Short: "Allow a new IP on the firewall.",
+		SilenceErrors: true, // errors are always propogated to main, no need to print again
+		Use:           "update",
+		Short:         "Allow a new IP on the firewall.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// get local configuration
 			f, err := os.OpenFile(cfgFilePath, os.O_RDWR, 0666)
@@ -76,8 +77,9 @@ func Update() *cobra.Command {
 // Sync initiates a manual synchronization of the local configuration stored in ~/.fwsync to the desired GCP Firewall.
 func Sync() *cobra.Command {
 	return &cobra.Command{
-		Use:   "sync",
-		Short: "Synchronize local config with firewall",
+		SilenceErrors: true, // errors are always propogated to main, no need to print again
+		Use:           "sync",
+		Short:         "Synchronize local config with firewall",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// get local configuration
 			f, err := os.OpenFile(cfgFilePath, os.O_RDWR, 0666)
