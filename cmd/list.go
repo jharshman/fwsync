@@ -14,8 +14,9 @@ import (
 // List prints out the current source IPs configured in ~/.fwsync and the source IPs active on the GCP Firewall.
 func List() *cobra.Command {
 	return &cobra.Command{
-		Use:   "list",
-		Short: "Display your firewall's allowed IPs.",
+		SilenceErrors: true, // errors are always propogated to main, no need to print again
+		Use:           "list",
+		Short:         "Display your firewall's allowed IPs.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// get local configured ips
 			home, _ := os.UserHomeDir()
@@ -60,8 +61,9 @@ func List() *cobra.Command {
 // This command will not update the fwsync configuration.
 func GetCurrentIP() *cobra.Command {
 	return &cobra.Command{
-		Use:   "get-ip",
-		Short: "Fetches your current public IP.",
+		SilenceErrors: true, // errors are always propogated to main, no need to print again
+		Use:           "get-ip",
+		Short:         "Fetches your current public IP.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			currentIP, err := config.PublicIP()
 			fmt.Printf("current public IP: %s\n", currentIP)
