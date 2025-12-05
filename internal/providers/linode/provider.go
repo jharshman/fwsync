@@ -62,10 +62,22 @@ func (c Client) Get(ctx context.Context, name string) (*generic.Firewall, error)
 		return nil, fmt.Errorf("more than one firewall matching filter: label:%s AND is:firewall", name)
 	}
 
+	// doing a lot of extra bounds checking on nested slices here
+	// this ensures that we don't hit an out-of-bounds error or nil ptr dereference.
+	if len(fw[0].Rules.Inbound) == 0 {
+		return nil, fmt.Errorf("firewall: %s has no Inbound rules", fw[0].Label)
+	}
+
+	if fw[0].Rules.Inbound[0].Addresses.IPv4 == nil {
+		return nil, fmt.Errorf("firewall: %s has no IPv4 addresses configured", fw[0].Label)
+	}
+
+	addrs := *fw[0].Rules.Inbound[0].Addresses.IPv4
+
 	return &generic.Firewall{
 		Name:                 fw[0].Label,
 		Misc:                 map[string]any{"id": fw[0].ID},
-		AllowedIPv4Addresses: *fw[0].Rules.Inbound[0].Addresses.IPv4,
+		AllowedIPv4Addresses: addrs,
 	}, nil
 }
 
