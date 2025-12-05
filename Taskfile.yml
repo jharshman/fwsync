@@ -1,12 +1,13 @@
 version: '3'
 
 tasks:
+
   has:golangci-lint:
     desc: Check if golangci-lint is installed
     cmds:
       - |
         if ! command -v golangci-lint > /dev/null; then
-          echo "golangci-lint not found missing. To install see https://github.com/golangci/golangci-lint/releases"
+          echo "golangci-lint not found. To install see https://github.com/golangci/golangci-lint/releases"
           exit 1
         fi
 
@@ -16,7 +17,7 @@ tasks:
       - task: has:golangci-lint
     cmds:
       - golangci-lint run
-
+ 
   test:
     desc: Run test suites
     cmds:
