@@ -50,3 +50,7 @@ Available Commands:
 
 > Note: I am currently working on implementing more providers like AWS, Azure, and DigitalOcean.
 > Contributions are welcome.
+
+## Contributing
+
+Interested in contributing to fwsync? Check out the [contribution guide](CONTRIBUTING.md).

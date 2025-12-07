@@ -91,7 +91,7 @@ func (c Client) Update(ctx context.Context, name string, sourceRanges []string) 
 
 	id, ok := fw.Misc["id"].(int)
 	if !ok {
-		return fmt.Errorf("no id found")
+		return fmt.Errorf("no id found for firewall: %s", name)
 	}
 
 	_, err = c.conn.UpdateFirewallRules(ctx, id, linodego.FirewallRuleSet{
