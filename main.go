@@ -25,9 +25,12 @@ connecting from and keeps your development VM firewall rule up to date with that
 
 	versionCmd := &cobra.Command{
 		Use:   "version",
-		Short: "Display version information",
+		Short: "Display version information and check for updates",
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println(version)
+		},
+		PostRunE: func(cmd *cobra.Command, args []string) error {
+			return notifyIfUpdateAvailable()
 		},
 	}
 
@@ -43,12 +46,6 @@ connecting from and keeps your development VM firewall rule up to date with that
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintf(os.Stderr, "Error running command: %q\n", err)
-		os.Exit(1)
-	}
-
-	err := notifyIfUpdateAvailable()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error checking for updates: %q\n", err)
 		os.Exit(1)
 	}
 }
