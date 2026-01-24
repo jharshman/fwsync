@@ -40,7 +40,7 @@ Available Commands:
   list        Display your firewall's allowed IPs.
   sync        Synchronize local config with firewall
   update      Allow a new IP on the firewall.
-  version     Display version information
+  version     Display version information and check for updates.
 ```
 
 ## Supported Providers
