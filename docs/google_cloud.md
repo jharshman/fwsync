@@ -4,6 +4,11 @@ Protect your VM with a Google Cloud Firewall Rule. Create and associate a
 Firewall Policy with a new or existing Google Cloud Instance and manage its
 allowed IPv4 Addresses with fwsync.
 
+## Prerequisites
+1. GCP account
+1. VM Instance
+1. Firewall Rule associated with running Instance
+
 ## Authentication
 The recommended method of authentication is to run the following command:
 
@@ -13,28 +18,9 @@ $ gcloud auth application-default login
 
 ## Quick Start
 
-Create an instance or use an existing instance:
-```bash
-gcloud compute instances create my-dev-vm \
-  --zone <ZONE> \
-  --project <PROJECT> \
-  --machine-type <MACHINE_TYPE> \
-  --image-family <IMAGE_FAMILY> \
-  --tags my-dev-vm
+```
+$ fwsync init --provider google --project YOUR_PROJECT
 ```
 
-Create and associate to the instance:
-```bash
-$ gcloud compute firewall-rules create allow-dev-vm \
-  --allow TCP \
-  --direction INGRESS \
-  --network <NETWORK> \
-  --source-ranges <YOUR PUBLIC IP> \
-  --target-tags <my-dev-vm> \
-  --project <PROJECT>
-```
-
-> **Important:** Instance association is done via Instance Tag and Target Tag.
-The Target Tag on the Firewall must match one of the defined Tags
-on the Instance.
+Whenever your ISP leases you a new IP, you can run `fwsync update` to seemlessly update your managed firewall rule.
 
