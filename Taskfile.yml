@@ -1,5 +1,8 @@
 version: '3'
 
+vars:
+  VERSION: v0.0.0-devbuild
+
 tasks:
 
   has:golangci-lint:
@@ -26,5 +29,5 @@ tasks:
   build:
     desc: Compile the project
     cmds:
-      - go build -o ./bin/ -v ./...
+      - go build -o ./bin/ -ldflags="-X 'main.version={{.VERSION}}'" -v ./...
 
