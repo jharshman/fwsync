@@ -21,6 +21,16 @@ wget -q $RELEASE
 tar -C $HOME/.local/bin/ --exclude README.md --exclude LICENSE -zxvf fwsync_${OS}_${ARCH}.tar.gz
 chmod +x $HOME/.local/bin/fwsync
 
+# patch existing configuration file for bitly users
+if [[ ! -z $HOME/.fwsync ]]; then
+  if ! grep 'provider' $HOME/.fwsync; then
+    cat << EOF > $HOME/.fwsync
+provider: google
+$(cat $HOME/.fwsync)
+EOF
+  fi
+fi
+
 rcfile="$HOME/.zshrc"
 if [[ $SHELL == "/bin/bash" ]]; then
   rcfile="$HOME/.bashrc"
