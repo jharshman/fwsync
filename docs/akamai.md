@@ -22,5 +22,20 @@ $ export LINODE_TOKEN="YOUR_LINODE_API_TOKEN"
 $ fwsync init --provider linode
 ```
 
+## How fwsync manages the Firewall
+fwsync manages a single inbound rule labeled `fwsync` that allows TCP traffic
+from your IPs. If the rule doesn't exist it is created. Every other rule, and the
+Firewall's inbound and outbound policies, are left untouched. You can edit the
+`fwsync` rule's ports or protocol in Cloud Manager and fwsync will keep them,
+only replacing its IPv4 addresses.
+
+Make sure the Firewall's inbound policy is set to **DROP**. With an inbound
+policy of ACCEPT all traffic is allowed and the `fwsync` rule has no effect.
+fwsync prints a warning when it detects this.
+
+> Note: fwsync v0.0.3 and earlier replaced all of the Firewall's rules and set
+> the inbound policy to ACCEPT. If you used one of those versions, check your
+> Firewall's inbound policy and re-add any rules that were removed.
+
 Whenever your ISP leases you a new IP, you can run `fwsync update` to seemlessly update your managed firewall rule.
 

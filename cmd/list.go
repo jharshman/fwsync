@@ -3,54 +3,34 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
 	"strings"
-	"time"
 
 	"github.com/jharshman/fwsync/config"
 	"github.com/spf13/cobra"
 )
 
-// List prints out the current source IPs configured in ~/.fwsync and the source IPs active on the GCP Firewall.
+// List prints out the current source IPs configured in ~/.fwsync and the source IPs active on the configured firewall.
 func List() *cobra.Command {
 	return &cobra.Command{
 		SilenceErrors: true, // errors are always propogated to main, no need to print again
 		Use:           "list",
 		Short:         "Display your firewall's allowed IPs.",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// get local configured ips
-			home, _ := os.UserHomeDir()
-			f, err := os.Open(fmt.Sprintf("%s/%s", home, transactionFile))
-			if err != nil {
-				return err
-			}
-			defer f.Close()
-
-			cfg, err := config.LoadFromFile(f)
+			cfg, provider, err := loadConfig()
 			if err != nil {
 				return err
 			}
 
-			FirewallClient, err = cfg.AuthForProvider()
-			if err != nil {
-				return err
-			}
-
-			localIPs := cfg.SourceIPs
-
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+			ctx, cancel := context.WithTimeout(context.Background(), apiTimeout)
 			defer cancel()
 
-			// get configured fw ips
-			fw, err := FirewallClient.Get(ctx, cfg.Name)
+			fw, err := provider.Get(ctx, cfg.Name)
 			if err != nil {
 				return err
 			}
-			remoteIPs := fw.AllowedIPv4Addresses
 
-			// pretty print
-			fmt.Printf("fwsync configurations\n----------------------\nlocal: (%s)\n%s", f.Name(), prettyPrint(localIPs))
-			fmt.Printf("\nremote: (%s)\n%s", cfg.Name, prettyPrint(remoteIPs))
+			fmt.Printf("fwsync configurations\n----------------------\nlocal: (%s)\n%s", cfgFilePath, prettyPrint(cfg.SourceIPs))
+			fmt.Printf("\nremote: (%s)\n%s", cfg.Name, prettyPrint(fw.AllowedIPv4Addresses))
 			return nil
 		},
 	}

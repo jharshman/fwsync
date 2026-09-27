@@ -22,5 +22,7 @@ $ gcloud auth application-default login
 $ fwsync init --provider google --project YOUR_PROJECT
 ```
 
+`google` is the default provider, so `--provider` can be omitted.
+
 Whenever your ISP leases you a new IP, you can run `fwsync update` to seemlessly update your managed firewall rule.
 

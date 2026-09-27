@@ -112,7 +112,8 @@ ips:
 	got, err := LoadFromFile(buf)
 	is.NoErr(err)
 	is.Equal(got, &Config{
-		Name: "firstname-lastname-firewall-rule",
+		Provider: "google", // files without a provider predate multi-provider support
+		Name:     "firstname-lastname-firewall-rule",
 		SourceIPs: []string{
 			"1.1.1.1",
 			"2.2.2.2",
@@ -308,4 +309,11 @@ func TestConfig_Remove(t *testing.T) {
 			is.Equal(tc.cfg, tc.expect)
 		})
 	}
+}
+
+func TestNewFromFileKeepsProvider(t *testing.T) {
+	is := is.New(t)
+	got, err := LoadFromFile(bytes.NewBufferString("provider: linode\nname: my-firewall\nips:\n  - 1.1.1.1\n"))
+	is.NoErr(err)
+	is.Equal(got.Provider, "linode")
 }
