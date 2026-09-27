@@ -92,6 +92,24 @@ config changes.
 Resolves: ISSUENUMBER
 ```
 
+## Adding a Provider
+
+Providers live in `internal/providers`. To add one:
+
+1. Create a package under `internal/providers/<name>` with a type that implements
+   `generic.Provider` (see `internal/providers/generic/provider.go`).
+   - `Update` must only replace the addresses fwsync manages. Never overwrite
+     other rules or policies on the user's firewall.
+   - `Get` must not fail just because fwsync hasn't managed the firewall yet.
+   - Read credentials the way the provider's own CLI/SDK does (environment
+     variables, default credential chains) rather than storing them in `~/.fwsync`.
+2. Add a name constant and a constructor entry to the registry in
+   `internal/providers/providers.go`. That's the only place outside your package
+   that needs to change.
+3. If the provider needs a setting from the config file (like Google's project),
+   add it to `providers.Settings` and `config.Config`.
+4. Add a `docs/<provider>.md` getting started guide and link it from the README.
+
 ## Submitting Changes
 
 ### Pull Request Guidelines

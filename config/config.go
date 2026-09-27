@@ -4,30 +4,18 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/jharshman/fwsync/internal/providers/gcp"
-	"github.com/jharshman/fwsync/internal/providers/generic"
-	"github.com/jharshman/fwsync/internal/providers/linode"
+	"github.com/jharshman/fwsync/internal/providers"
 	"gopkg.in/yaml.v2"
 )
 
 const (
 	defaultIPLimit = 5
 	ipURL          = "https://ipv4.icanhazip.com"
-)
-
-var (
-	// providers
-	ProviderGoogle = "google"
-	ProviderLinode = "linode"
-
-	// todo: implement the following providers
-	//providerAWS          = "amazon"
-	//providerAzure        = "azure"
-	//providerDigitalOcean = "digitalocean"
 )
 
 // Config describes the fwsync configuration. It is used to hold basic information about the
@@ -59,23 +47,17 @@ func LoadFromFile(r io.Reader) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+	// Configuration files written before fwsync supported multiple providers
+	// have no provider field. Google Cloud was the only provider at the time.
+	if config.Provider == "" {
+		config.Provider = providers.Google
+	}
 	return config, nil
 }
 
-// AuthForProvider authenticates for a given supported Cloud Provider and returns the
-// provider's implementation of generic.Provider.
-func (c *Config) AuthForProvider() (generic.Provider, error) {
-	var client generic.Provider
-	var err error
-	switch c.Provider {
-	case ProviderGoogle:
-		client, err = gcp.New(c.Project)
-	case ProviderLinode:
-		client, err = linode.New()
-	default:
-		err = fmt.Errorf("invalid provider: %s", c.Provider)
-	}
-	return client, err
+// ProviderSettings returns the provider specific values held in the configuration.
+func (c *Config) ProviderSettings() providers.Settings {
+	return providers.Settings{Project: c.Project}
 }
 
 // Write will write the fwsync configuration from memory to disk.
@@ -149,10 +131,18 @@ func PublicIP() (string, error) {
 	}
 	defer res.Body.Close()
 
-	body, err := io.ReadAll(res.Body)
+	if res.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("fetching public IP from %s: %s", ipURL, res.Status)
+	}
+
+	body, err := io.ReadAll(io.LimitReader(res.Body, 64))
 	if err != nil {
 		return "", err
 	}
 
-	return strings.TrimSpace(string(body)), nil
+	ip := strings.TrimSpace(string(body))
+	if parsed := net.ParseIP(ip); parsed == nil || parsed.To4() == nil {
+		return "", fmt.Errorf("fetching public IP from %s: unexpected response %q", ipURL, ip)
+	}
+	return ip, nil
 }
